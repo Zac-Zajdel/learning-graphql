@@ -24,6 +24,7 @@
     "@apollo/datasource-rest": "^6.4.1",
     "@apollo/server": "^4.11.3",
     "@parcel/watcher": "^2.4.0",
+    "dataloader": "^2.2.3",
     "graphql": "^16.10.0",
     "graphql-tag": "^2.12.6"
   },
