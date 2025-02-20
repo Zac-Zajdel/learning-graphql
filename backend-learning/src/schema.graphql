@@ -33,8 +33,15 @@ type CreateListingResponse {
   success: Boolean!
   "Human-readable message for the UI"
   message: String!
+  "List of validation errors"
+  errors: [ErrorMessageResponse]
   "The newly created listing"
   listing: Listing
+}
+
+type ErrorMessageResponse {
+  field: String!
+  message: String!
 }
 
 "A particular intergalactic location available for booking"

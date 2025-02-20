@@ -1,5 +1,7 @@
 import { Resolvers } from "./types";
 import { validateFullAmenities } from "./helpers";
+import { createListingSchema } from "./validators/createListingSchema";
+import { z } from "zod";
 
 export const resolvers: Resolvers = {
   Query: {
@@ -12,7 +14,6 @@ export const resolvers: Resolvers = {
   },
   Listing: {
     amenities: ({ id, amenities }, _, { dataSources }) => {
-      // TODO - Improve with DataLoaders (https://www.apollographql.com/tutorials/dataloaders-typescript/01-course-overview-and-setup)
       return validateFullAmenities(amenities)
         ? amenities
         : dataSources.listingAPI.getAmenities(id)
@@ -21,6 +22,8 @@ export const resolvers: Resolvers = {
   Mutation: {
     createListing: async (_, { input }, { dataSources }) => {
       try {
+        createListingSchema.parse(input);
+  
         const response = await dataSources.listingAPI.createListing(input)
 
         return {
@@ -30,10 +33,26 @@ export const resolvers: Resolvers = {
           listing: response,
         }
       } catch (err) {
+        if (err instanceof z.ZodError) {
+          const validationErrors = err.errors.map(error => ({
+            field: error.path.join('.'),
+            message: error.message,
+          }))
+
+          return {
+            code: 400,
+            success: false,
+            message: "Validation failed",
+            errors: validationErrors,
+            listing: null,
+          }
+        }
+
         return {
           code: 500,
           success: false,
           message: `Something went wrong: ${err.extensions.response.body}`,
+          errors: [],
           listing: null,
         };
       }
